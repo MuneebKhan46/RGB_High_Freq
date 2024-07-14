@@ -271,7 +271,7 @@ wcw_model_early_stopping = keras.callbacks.EarlyStopping(monitor='val_accuracy',
 wcw_history = resnet50_wcw_model.fit(X_train, y_train, epochs=50, validation_data=(X_val, y_val), callbacks=[wcw_model_checkpoint, wcw_model_early_stopping])
 
 wcw_history_df = pd.DataFrame(wcw_history.history)
-wcw_history_df.to_csv('/WACV_Paper/History/ResNet50_RGB_wCW.csv', index=False)
+wcw_history_df.to_csv('/WACV_Paper/History_RGB/ResNet50_RGB_wCW.csv', index=False)
 
 
 ##########################################################################################################################################################################
@@ -301,14 +301,14 @@ cw_model_early_stopping = keras.callbacks.EarlyStopping(monitor='val_accuracy', 
 cw_history = resnet50_cw_model.fit(X_train, y_train, epochs=50, class_weight=class_weight, validation_data=(X_val, y_val), callbacks=[cw_model_early_stopping, cw_model_checkpoint])
 
 cw_history_df = pd.DataFrame(cw_history.history)
-cw_history_df.to_csv('/WACV_Paper/History/ResNet50_RGB_CW.csv', index=False)
+cw_history_df.to_csv('/WACV_Paper/History_RGB/ResNet50_RGB_CW.csv', index=False)
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
                                                                     # Testing
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
 
-X_test = np.array(X_test)
+# X_test = np.array(X_test)
 
 ##########################################################################################################################################################################
 ## Without Class Weight
