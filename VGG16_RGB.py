@@ -112,7 +112,7 @@ def prepare_data(data, labels):
 
 #########################################################################################################################################################################################################################################
 
-def save_metric_details(model_name, technique, feature_name, test_acc, weighted_precision, weighted_recall, weighted_f1_score, test_loss, accuracy_0, accuracy_1, result_file_path):
+def save_metric_details(model_name, technique, test_acc, weighted_precision, weighted_recall, weighted_f1_score, test_loss, accuracy_0, accuracy_1, result_file_path):
 
     if path.exists(result_file_path):
     
