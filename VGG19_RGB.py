@@ -119,7 +119,6 @@ def save_metric_details(model_name, technique, feature_name, test_acc, weighted_
         df_new_row = pd.DataFrame({
             'Model': [model_name],
             'Technique' : [technique],
-            'Feature Map' : [feature_name],
             'Overall Accuracy': [test_acc],
             'Precision': [weighted_precision],
             'Recall': [weighted_recall],
@@ -133,8 +132,7 @@ def save_metric_details(model_name, technique, feature_name, test_acc, weighted_
     
         df_metrics = pd.DataFrame({
             'Model': [model_name],
-            'Technique' : [technique],            
-            'Feature Map' : [feature_name],
+            'Technique' : [technique],
             'Overall Accuracy': [test_acc],
             'Precision': [weighted_precision],
             'Recall': [weighted_recall],
