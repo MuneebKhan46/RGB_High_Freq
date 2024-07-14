@@ -5,7 +5,7 @@ from os import path
 import csv
 import textwrap
 import pandas as pd
-
+from PIL import Image
 
 from tensorflow.keras.regularizers import l1
 import matplotlib.pyplot as plt
