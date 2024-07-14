@@ -294,7 +294,7 @@ print('Weight for class 0 (Non-ghosting): {:.2f}'.format(weight_for_0))
 print('Weight for class 1 (Ghosting): {:.2f}'.format(weight_for_1))
 
 resnet50_cw_model = create_resnet50_model()
-  resnet50_cw_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+resnet50_cw_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
 cw_model_checkpoint = keras.callbacks.ModelCheckpoint(filepath='/WACV_Paper/Models/ResNet50_RGB_CW.keras', save_best_only=True, monitor='val_accuracy', mode='max', verbose=1)
 cw_model_early_stopping = keras.callbacks.EarlyStopping(monitor='val_accuracy', min_delta=0, patience=10, restore_best_weights=True)
