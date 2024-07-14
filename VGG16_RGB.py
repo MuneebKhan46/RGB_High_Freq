@@ -120,7 +120,6 @@ def save_metric_details(model_name, technique, feature_name, test_acc, weighted_
         df_new_row = pd.DataFrame({
             'Model': [model_name],
             'Technique' : [technique],
-            'Feature Map' : [feature_name],
             'Overall Accuracy': [test_acc],
             'Precision': [weighted_precision],
             'Recall': [weighted_recall],
@@ -134,8 +133,7 @@ def save_metric_details(model_name, technique, feature_name, test_acc, weighted_
     
         df_metrics = pd.DataFrame({
             'Model': [model_name],
-            'Technique' : [technique],            
-            'Feature Map' : [feature_name],
+            'Technique' : [technique],
             'Overall Accuracy': [test_acc],
             'Precision': [weighted_precision],
             'Recall': [weighted_recall],
@@ -189,7 +187,7 @@ def create_vgg16_model(input_shape=(224,224, 3)):
 
 
 ##########################################################################################################################################################################
-print("start")
+
 original_patches, denoised_patches, labels, denoised_image_names, all_patch_numbers = load_data_from_csv(csv_path, original_dir, denoised_dir)
 
 diff_patches = calculate_difference(original_patches, denoised_patches)
@@ -232,13 +230,10 @@ print(f"y_Test Shape: {y_test.shape}")
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
 
-opt = Adam(learning_rate=2e-05)
 vgg16_wcw_model = create_vgg16_model()
-# vgg16_wcw_model.compile(optimizer=opt, loss='binary_crossentropy', metrics=['accuracy'])
-vgg16_wcw_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+vgg16_wcw_model.compile(optimizer=Adam(learning_rate=0.001), loss='binary_crossentropy', metrics=['accuracy'])
 
-
-wcw_model_checkpoint = keras.callbacks.ModelCheckpoint(filepath='/WACV_Paper/Models_RAW/VGG16_RGB_wCW.keras', save_best_only=True, monitor='val_accuracy', mode='max', verbose=1)
+wcw_model_checkpoint = keras.callbacks.ModelCheckpoint(filepath='/WACV_Paper/Models/VGG16_RGB_wCW.keras', save_best_only=True, monitor='val_accuracy', mode='max', verbose=1)
 wcw_model_early_stopping = keras.callbacks.EarlyStopping(monitor='val_accuracy', min_delta=0, patience=10, restore_best_weights=True)
 
 wcw_history = vgg16_wcw_model.fit(X_train, y_train, epochs=50, validation_data=(X_val, y_val), callbacks=[wcw_model_checkpoint, wcw_model_early_stopping])
@@ -265,12 +260,10 @@ class_weight = {0: weight_for_0, 1: weight_for_1}
 print('Weight for class 0 (Non-ghosting): {:.2f}'.format(weight_for_0))
 print('Weight for class 1 (Ghosting): {:.2f}'.format(weight_for_1))
 
-opt = Adam(learning_rate=2e-05)
 vgg16_cw_model = create_vgg16_model()
-# vgg16_cw_model.compile(optimizer=opt, loss='binary_crossentropy', metrics=['accuracy'])
-vgg16_cw_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+vgg16_cw_model.compile(optimizer=Adam(learning_rate=0.001), loss='binary_crossentropy', metrics=['accuracy'])
 
-cw_model_checkpoint = keras.callbacks.ModelCheckpoint(filepath='/WACV_Paper/Models_RAW/VGG16_RGB_CW.keras', save_best_only=True, monitor='val_accuracy', mode='max', verbose=1)
+cw_model_checkpoint = keras.callbacks.ModelCheckpoint(filepath='/WACV_Paper/Models/VGG16_RGB_CW.keras', save_best_only=True, monitor='val_accuracy', mode='max', verbose=1)
 cw_model_early_stopping = keras.callbacks.EarlyStopping(monitor='val_accuracy', min_delta=0, patience=10, restore_best_weights=True)
 
 cw_history = vgg16_cw_model.fit(X_train, y_train, epochs=50, class_weight=class_weight, validation_data=(X_val, y_val), callbacks=[cw_model_early_stopping, cw_model_checkpoint])
@@ -283,7 +276,7 @@ cw_history_df.to_csv('/WACV_Paper/History/VGG16_RGB_CW.csv', index=False)
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
 
-X_test = np.array(X_test)
+# X_test = np.array(X_test)
 
 ##########################################################################################################################################################################
 ## Without Class Weight
@@ -297,7 +290,7 @@ predicted_labels = np.argmax(predictions, axis=1)
 precision, recall, _ = precision_recall_curve(y_test, predictions[:, 0])
 
 pr_data = pd.DataFrame({'Precision': precision, 'Recall': recall })
-file_path = '/WACV_Paper/Plots_RAW/VGG16_RGB_wCW_PR_Curve.csv'
+file_path = '/WACV_Paper/Plots_CSV/VGG16_RGB_wCW_PR_Curve.csv'
 pr_data.to_csv(file_path, index=False)
 
 
@@ -308,7 +301,7 @@ plt.ylabel('Precision')
 plt.title('Precision-Recall Curve')
 plt.legend()
 plt.grid(True)
-precision_recall_curve_path = '/WACV_Paper/Plots_RAW/VGG16_RGB_wCW_PR_Curve.png'
+precision_recall_curve_path = '/WACV_Paper/Plots_RGB/VGG16_RGB_wCW_PR_Curve.png'
 
 if not os.path.exists(os.path.dirname(precision_recall_curve_path)):
     os.makedirs(os.path.dirname(precision_recall_curve_path))
@@ -354,9 +347,8 @@ weighted_recall    = weighted_recall*100
 
 
 model_name = "VGG16"
-feature_name = "Difference Map"
 technique = "Without Class Weight"
-save_metric_details(model_name, technique, feature_name, test_acc, weighted_precision, weighted_recall, weighted_f1_score, test_loss, accuracy_0, accuracy_1, result_file_path)
+save_metric_details(model_name, technique, test_acc, weighted_precision, weighted_recall, weighted_f1_score, test_loss, accuracy_0, accuracy_1, result_file_path)
 print(f"Accuracy: {test_acc:.4f} | precision: {weighted_precision:.4f}, Recall={weighted_recall:.4f}, F1-score={weighted_f1_score:.4f}, Loss={test_loss:.4f}, N.G.A Accuracy={accuracy_0:.4f}, G.A Accuracy={accuracy_1:.4f}")
 
 
@@ -373,7 +365,7 @@ predicted_labels = np.argmax(predictions, axis=1)
 precision, recall, _ = precision_recall_curve(y_test, predictions[:, 0])
 
 pr_data = pd.DataFrame({'Precision': precision, 'Recall': recall })
-file_path = '/WACV_Paper/Plots_RAW/VGG16_RGB_CW_PR_Curve.csv'
+file_path = '/WACV_Paper/Plots_CSV/VGG16_RGB_CW_PR_Curve.csv'
 pr_data.to_csv(file_path, index=False)
 
 plt.figure()
@@ -383,7 +375,7 @@ plt.ylabel('Precision')
 plt.title('Precision-Recall Curve')
 plt.legend()
 plt.grid(True)
-precision_recall_curve_path = '/WACV_Paper/Plots_RAW/VGG16_RGB_CW_PR_Curve.png'
+precision_recall_curve_path = '/WACV_Paper/Plots_RGB/VGG16_RGB_CW_PR_Curve.png'
 
 if not os.path.exists(os.path.dirname(precision_recall_curve_path)):
     os.makedirs(os.path.dirname(precision_recall_curve_path))
@@ -429,7 +421,6 @@ weighted_recall    = weighted_recall*100
 
 
 model_name = "VGG16"
-feature_name = "Difference Map"
 technique = "Class Weight"
-save_metric_details(model_name, technique, feature_name, test_acc, weighted_precision, weighted_recall, weighted_f1_score, test_loss, accuracy_0, accuracy_1, result_file_path)
+save_metric_details(model_name, technique, test_acc, weighted_precision, weighted_recall, weighted_f1_score, test_loss, accuracy_0, accuracy_1, result_file_path)
 print(f"Accuracy: {test_acc:.4f} | precision: {weighted_precision:.4f}, Recall={weighted_recall:.4f}, F1-score={weighted_f1_score:.4f}, Loss={test_loss:.4f}, N.G.A Accuracy={accuracy_0:.4f}, G.A Accuracy={accuracy_1:.4f}")
