@@ -246,7 +246,7 @@ wcw_model_early_stopping = keras.callbacks.EarlyStopping(monitor='val_accuracy',
 wcw_history = vgg19_wcw_model.fit(X_train, y_train, epochs=50, validation_data=(X_val, y_val), callbacks=[wcw_model_checkpoint, wcw_model_early_stopping])
 
 wcw_history_df = pd.DataFrame(wcw_history.history)
-wcw_history_df.to_csv('/WACV_Paper/History/VGG19_RGB_wCW.csv', index=False)
+wcw_history_df.to_csv('/WACV_Paper/History_RGB/VGG19_RGB_wCW.csv', index=False)
 
 
 ##########################################################################################################################################################################
@@ -276,7 +276,7 @@ cw_model_early_stopping = keras.callbacks.EarlyStopping(monitor='val_accuracy', 
 cw_history = vgg19_cw_model.fit(X_train, y_train, epochs=50, class_weight=class_weight, validation_data=(X_val, y_val), callbacks=[cw_model_early_stopping, cw_model_checkpoint])
 
 cw_history_df = pd.DataFrame(cw_history.history)
-cw_history_df.to_csv('/WACV_Paper/History/VGG19_RGB_CW.csv', index=False)
+cw_history_df.to_csv('/WACV_Paper/History_RGB/VGG19_RGB_CW.csv', index=False)
 
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
@@ -298,7 +298,7 @@ predicted_labels = np.argmax(predictions, axis=1)
 precision, recall, _ = precision_recall_curve(y_test, predictions[:, 0])
 
 pr_data = pd.DataFrame({'Precision': precision, 'Recall': recall })
-file_path = '/WACV_Paper/Plots_RAW/VGG19_RGB_wCW_PR_Curve.csv'
+file_path = '/WACV_Paper/Plots_CSV/VGG19_RGB_wCW_PR_Curve.csv'
 pr_data.to_csv(file_path, index=False)
 
 
@@ -309,7 +309,7 @@ plt.ylabel('Precision')
 plt.title('Precision-Recall Curve')
 plt.legend()
 plt.grid(True)
-precision_recall_curve_path = '/WACV_Paper/Plots_RAW/VGG19_RGB_wCW_PR_Curve.png'
+precision_recall_curve_path = '/WACV_Paper/Plots_RGB/VGG19_RGB_wCW_PR_Curve.png'
 
 if not os.path.exists(os.path.dirname(precision_recall_curve_path)):
     os.makedirs(os.path.dirname(precision_recall_curve_path))
@@ -355,9 +355,8 @@ weighted_recall    = weighted_recall*100
 
 
 model_name = "VGG19"
-feature_name = "Difference Map"
 technique = "Without Class Weight"
-save_metric_details(model_name, technique, feature_name, test_acc, weighted_precision, weighted_recall, weighted_f1_score, test_loss, accuracy_0, accuracy_1, result_file_path)
+save_metric_details(model_name, technique, test_acc, weighted_precision, weighted_recall, weighted_f1_score, test_loss, accuracy_0, accuracy_1, result_file_path)
 print(f"Accuracy: {test_acc:.4f} | precision: {weighted_precision:.4f}, Recall={weighted_recall:.4f}, F1-score={weighted_f1_score:.4f}, Loss={test_loss:.4f}, N.G.A Accuracy={accuracy_0:.4f}, G.A Accuracy={accuracy_1:.4f}")
 
 
@@ -374,7 +373,7 @@ predicted_labels = np.argmax(predictions, axis=1)
 precision, recall, _ = precision_recall_curve(y_test, predictions[:, 0])
 
 pr_data = pd.DataFrame({'Precision': precision, 'Recall': recall })
-file_path = '/WACV_Paper/Plots_RAW/VGG19_RGB_CW_PR_Curve.csv'
+file_path = '/WACV_Paper/Plots_CSV/VGG19_RGB_CW_PR_Curve.csv'
 pr_data.to_csv(file_path, index=False)
 
 plt.figure()
@@ -384,7 +383,7 @@ plt.ylabel('Precision')
 plt.title('Precision-Recall Curve')
 plt.legend()
 plt.grid(True)
-precision_recall_curve_path = '/WACV_Paper/Plots_RAW/VGG19_RGB_CW_PR_Curve.png'
+precision_recall_curve_path = '/WACV_Paper/Plots_RGB/VGG19_RGB_CW_PR_Curve.png'
 
 if not os.path.exists(os.path.dirname(precision_recall_curve_path)):
     os.makedirs(os.path.dirname(precision_recall_curve_path))
@@ -430,7 +429,6 @@ weighted_recall    = weighted_recall*100
 
 
 model_name = "VGG19"
-feature_name = "Difference Map"
 technique = "Class Weight"
-save_metric_details(model_name, technique, feature_name, test_acc, weighted_precision, weighted_recall, weighted_f1_score, test_loss, accuracy_0, accuracy_1, result_file_path)
+save_metric_details(model_name, technique, test_acc, weighted_precision, weighted_recall, weighted_f1_score, test_loss, accuracy_0, accuracy_1, result_file_path)
 print(f"Accuracy: {test_acc:.4f} | precision: {weighted_precision:.4f}, Recall={weighted_recall:.4f}, F1-score={weighted_f1_score:.4f}, Loss={test_loss:.4f}, N.G.A Accuracy={accuracy_0:.4f}, G.A Accuracy={accuracy_1:.4f}")
