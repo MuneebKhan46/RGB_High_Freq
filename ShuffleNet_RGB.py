@@ -418,7 +418,14 @@ weighted_f1_score  = weighted_f1_score*100
 weighted_precision = weighted_precision*100
 weighted_recall    = weighted_recall*100
 
+macro_precision = (precision_0 + precision_1) / 2
+macro_recall = (recall_0 + recall_1) / 2
 
+if macro_precision + macro_recall > 0:
+    macro_f1_score = 2 * (macro_precision * macro_recall) / (macro_precision + macro_recall)
+else:
+    macro_f1_score = 0
+    
 macro_f1_score  = macro_f1_score * 100
 macro_precision = macro_precision * 100
 macro_recall    = macro_recall * 100
