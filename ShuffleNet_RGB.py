@@ -111,7 +111,7 @@ def prepare_data(data, labels):
 
 #########################################################################################################################################################################################################################################
 
-def save_metric_details(model_name, technique, test_acc, weighted_precision, weighted_recall, weighted_f1_score, test_loss, accuracy_0, accuracy_1, result_file_path):
+def save_metric_details(model_name, technique, test_acc, weighted_precision, weighted_recall, weighted_f1_score, macro_precision, macro_recall, macro_f1_score, micro_precision, micro_recall, micro_f1_score, test_loss, accuracy_0, accuracy_1, result_file_path):
 
     if path.exists(result_file_path):
     
@@ -120,30 +120,41 @@ def save_metric_details(model_name, technique, test_acc, weighted_precision, wei
             'Model': [model_name],
             'Technique' : [technique],
             'Overall Accuracy': [test_acc],
-            'Precision': [weighted_precision],
-            'Recall': [weighted_recall],
-            'F1-Score': [weighted_f1_score],
+            'Weight Precision': [weighted_precision],
+            'Weight Recall': [weighted_recall],
+            'Weight F1-Score': [weighted_f1_score],
+            'Macro Precision': [macro_precision],
+            'Macro Recall': [macro_recall],
+            'Macro F1-Score': [macro_f1_score],
+            'Micro Precision': [micro_precision],
+            'Micro Recall': [micro_recall],
+            'Micro F1-Score': [micro_f1_score],
             'Loss': [test_loss],
             'Non-Ghosting Artifacts Accuracy': [accuracy_0],
             'Ghosting Artifacts Accuracy': [accuracy_1]
         })
         df_metrics = pd.concat([df_existing, df_new_row], ignore_index=True)
     else:
-    
+ 
         df_metrics = pd.DataFrame({
             'Model': [model_name],
             'Technique' : [technique],
             'Overall Accuracy': [test_acc],
-            'Precision': [weighted_precision],
-            'Recall': [weighted_recall],
-            'F1-Score': [weighted_f1_score],
+            'Weight Precision': [weighted_precision],
+            'Weight Recall': [weighted_recall],
+            'Weight F1-Score': [weighted_f1_score],
+            'Macro Precision': [macro_precision],
+            'Macro Recall': [macro_recall],
+            'Macro F1-Score': [macro_f1_score],
+            'Micro Precision': [micro_precision],
+            'Micro Recall': [micro_recall],
+            'Micro F1-Score': [micro_f1_score],
             'Loss': [test_loss],
             'Non-Ghosting Artifacts Accuracy': [accuracy_0],
             'Ghosting Artifacts Accuracy': [accuracy_1]
         })
 
     df_metrics.to_csv(result_file_path, index=False)
-
 ##########################################################################################################################################################################
 
 def channel_shuffle(x, groups):
@@ -194,7 +205,7 @@ class InvertedResidual(layers.Layer):
         return out
 
 class ShuffleNetV2(models.Model):
-    def __init__(self, input_shape=(224, 224, 3), num_classes=1, model_size='1.5x'):
+    def __init__(self, input_shape=(224, 224, 3), num_classes=1, model_size='0.5x'):
         super(ShuffleNetV2, self).__init__()
 
         if model_size == '0.5x':
@@ -292,7 +303,7 @@ print(f"y_Test Shape: {y_test.shape}")
 
 input_shape = (224, 224, 3)
 num_classes = 1
-shufflNet_wcw_model = ShuffleNetV2(input_shape=input_shape, num_classes=num_classes, model_size='1.5x')
+shufflNet_wcw_model = ShuffleNetV2(input_shape=input_shape, num_classes=num_classes, model_size='0.5x')
 shufflNet_wcw_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
 wcw_model_checkpoint = keras.callbacks.ModelCheckpoint(filepath='/WACV_Paper/Models/ShuffleNet_RGB_wCW.keras', save_best_only=True, monitor='val_accuracy', mode='max', verbose=1)
@@ -310,28 +321,28 @@ wcw_history_df.to_csv('/WACV_Paper/History_RGB/ShuffleNet_RGB_wCW.csv', index=Fa
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
 
-ng = len(total_patches[total_labels == 0])
-ga =  len(total_patches[total_labels == 1])
-total = ng + ga
+# ng = len(total_patches[total_labels == 0])
+# ga =  len(total_patches[total_labels == 1])
+# total = ng + ga
 
-imbalance_ratio = ng / ga  
-weight_for_0 = (1 / ng) * (total / 2.0)
-weight_for_1 = (1 / ga) * (total / 2.0)
-class_weight = {0: weight_for_0, 1: weight_for_1}
+# imbalance_ratio = ng / ga  
+# weight_for_0 = (1 / ng) * (total / 2.0)
+# weight_for_1 = (1 / ga) * (total / 2.0)
+# class_weight = {0: weight_for_0, 1: weight_for_1}
 
-print('Weight for class 0 (Non-ghosting): {:.2f}'.format(weight_for_0))
-print('Weight for class 1 (Ghosting): {:.2f}'.format(weight_for_1))
+# print('Weight for class 0 (Non-ghosting): {:.2f}'.format(weight_for_0))
+# print('Weight for class 1 (Ghosting): {:.2f}'.format(weight_for_1))
 
-shufflNet_cw_model = ShuffleNetV2(input_shape=input_shape, num_classes=num_classes, model_size='1.0x')
-shufflNet_cw_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+# shufflNet_cw_model = ShuffleNetV2(input_shape=input_shape, num_classes=num_classes, model_size='0.5x')
+# shufflNet_cw_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
-cw_model_checkpoint = keras.callbacks.ModelCheckpoint(filepath='/WACV_Paper/Models/ShuffleNet_RGB_CW.keras', save_best_only=True, monitor='val_accuracy', mode='max', verbose=1)
-cw_model_early_stopping = keras.callbacks.EarlyStopping(monitor='val_accuracy', min_delta=0, patience=10, restore_best_weights=True)
+# cw_model_checkpoint = keras.callbacks.ModelCheckpoint(filepath='/WACV_Paper/Models/ShuffleNet_RGB_CW.keras', save_best_only=True, monitor='val_accuracy', mode='max', verbose=1)
+# cw_model_early_stopping = keras.callbacks.EarlyStopping(monitor='val_accuracy', min_delta=0, patience=10, restore_best_weights=True)
 
-cw_history = shufflNet_cw_model.fit(X_train, y_train, epochs=50, class_weight=class_weight, validation_data=(X_val, y_val), callbacks=[cw_model_early_stopping, cw_model_checkpoint])
+# cw_history = shufflNet_cw_model.fit(X_train, y_train, epochs=50, class_weight=class_weight, validation_data=(X_val, y_val), callbacks=[cw_model_early_stopping, cw_model_checkpoint])
 
-cw_history_df = pd.DataFrame(cw_history.history)
-cw_history_df.to_csv('/WACV_Paper/History_RGB/ShuffleNet_RGB_CW.csv', index=False)
+# cw_history_df = pd.DataFrame(cw_history.history)
+# cw_history_df.to_csv('/WACV_Paper/History_RGB/ShuffleNet_RGB_CW.csv', index=False)
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
                                                                     # Testing
@@ -408,82 +419,107 @@ weighted_precision = weighted_precision*100
 weighted_recall    = weighted_recall*100
 
 
+macro_f1_score  = macro_f1_score * 100
+macro_precision = macro_precision * 100
+macro_recall    = macro_recall * 100
+
+
+TP_0 = total_class_0 * recall_0
+TP_1 = total_class_1 * recall_1
+FP_0 = total_class_0 * (1 - precision_0)
+FP_1 = total_class_1 * (1 - precision_1)
+FN_0 = total_class_0 * (1 - recall_0)
+FN_1 = total_class_1 * (1 - recall_1)
+
+micro_precision = (TP_0 + TP_1) / (TP_0 + TP_1 + FP_0 + FP_1)
+micro_recall = (TP_0 + TP_1) / (TP_0 + TP_1 + FN_0 + FN_1)
+
+if micro_precision + micro_recall > 0:
+    micro_f1_score = 2 * (micro_precision * micro_recall) / (micro_precision + micro_recall)
+else:
+    micro_f1_score = 0
+
+
+micro_f1_score  = micro_f1_score * 100
+micro_precision = micro_precision * 100
+micro_recall    = micro_recall * 100
+
 model_name = "ShuffleNet"
 technique = "Without Class Weight"
-save_metric_details(model_name, technique, test_acc, weighted_precision, weighted_recall, weighted_f1_score, test_loss, accuracy_0, accuracy_1, result_file_path)
-print(f"Accuracy: {test_acc:.4f} | precision: {weighted_precision:.4f}, Recall={weighted_recall:.4f}, F1-score={weighted_f1_score:.4f}, Loss={test_loss:.4f}, N.G.A Accuracy={accuracy_0:.4f}, G.A Accuracy={accuracy_1:.4f}")
+save_metric_details(model_name, technique, test_acc, weighted_precision, weighted_recall, weighted_f1_score, macro_precision, macro_recall, macro_f1_score, micro_precision, micro_recall, micro_f1_score, test_loss, accuracy_0, accuracy_1, result_file_path)
+print(f"Accuracy: {test_acc:.4f} | precision: {weighted_precision:.4f}, Recall={weighted_recall:.4f}, F1-score={weighted_f1_score:.4f}, Macro Precision: {macro_precision:.4f}, Macro Recall={macro_recall:.4f}, Macro F1-score={macro_f1_score:.4f}, Micro precision: {micro_precision:.4f}, Micro Recall={micro_recall:.4f}, Micro F1-score={micro_f1_score:.4f}, Loss={test_loss:.4f}, N.G.A Accuracy={accuracy_0:.4f}, G.A Accuracy={accuracy_1:.4f}")
 
 
 ##########################################################################################################################################################################
 
 ## With Class Weight
 
-test_loss, test_acc = shufflNet_cw_model.evaluate(X_test, y_test)
-test_acc  = test_acc *100
+# test_loss, test_acc = shufflNet_cw_model.evaluate(X_test, y_test)
+# test_acc  = test_acc *100
 
-predictions = shufflNet_cw_model.predict(X_test)
-predicted_labels = np.argmax(predictions, axis=1)
+# predictions = shufflNet_cw_model.predict(X_test)
+# predicted_labels = np.argmax(predictions, axis=1)
 
-precision, recall, _ = precision_recall_curve(y_test, predictions[:, 0])
+# precision, recall, _ = precision_recall_curve(y_test, predictions[:, 0])
 
-pr_data = pd.DataFrame({'Precision': precision, 'Recall': recall })
-file_path = '/WACV_Paper/Plots_CSV/ShuffleNet_RGB_CW_PR_Curve.csv'
-pr_data.to_csv(file_path, index=False)
+# pr_data = pd.DataFrame({'Precision': precision, 'Recall': recall })
+# file_path = '/WACV_Paper/Plots_CSV/ShuffleNet_RGB_CW_PR_Curve.csv'
+# pr_data.to_csv(file_path, index=False)
 
-plt.figure()
-plt.plot(recall, precision, linestyle='-', color='b')
-plt.xlabel('Recall')
-plt.ylabel('Precision')
-plt.title('Precision-Recall Curve')
-plt.legend()
-plt.grid(True)
-precision_recall_curve_path = '/WACV_Paper/Plots_RGB/ShuffleNet_RGB_CW_PR_Curve.png'
+# plt.figure()
+# plt.plot(recall, precision, linestyle='-', color='b')
+# plt.xlabel('Recall')
+# plt.ylabel('Precision')
+# plt.title('Precision-Recall Curve')
+# plt.legend()
+# plt.grid(True)
+# precision_recall_curve_path = '/WACV_Paper/Plots_RGB/ShuffleNet_RGB_CW_PR_Curve.png'
 
-if not os.path.exists(os.path.dirname(precision_recall_curve_path)):
-    os.makedirs(os.path.dirname(precision_recall_curve_path))
+# if not os.path.exists(os.path.dirname(precision_recall_curve_path)):
+#     os.makedirs(os.path.dirname(precision_recall_curve_path))
 
-plt.savefig(precision_recall_curve_path, dpi=300)
-plt.close()
-
-
-report = classification_report(y_test, predicted_labels, output_dict=True, target_names=["Non-Ghosting Artifact", "Ghosting Artifact"])
-
-conf_matrix = confusion_matrix(y_test, predicted_labels)
-TN = conf_matrix[0, 0]
-FP = conf_matrix[0, 1]
-FN = conf_matrix[1, 0]
-TP = conf_matrix[1, 1]
-
-total_class_0 = TN + FP
-total_class_1 = TP + FN
-correctly_predicted_0 = TN
-correctly_predicted_1 = TP
+# plt.savefig(precision_recall_curve_path, dpi=300)
+# plt.close()
 
 
-accuracy_0 = (TN / total_class_0) * 100
-accuracy_1 = (TP / total_class_1) * 100
+# report = classification_report(y_test, predicted_labels, output_dict=True, target_names=["Non-Ghosting Artifact", "Ghosting Artifact"])
 
-precision_0 = TN / (TN + FN) if (TN + FN) > 0 else 0
-recall_0 = TN / (TN + FP) if (TN + FP) > 0 else 0
-precision_1 = TP / (TP + FP) if (TP + FP) > 0 else 0
-recall_1 = TP / (TP + FN) if (TP + FN) > 0 else 0
+# conf_matrix = confusion_matrix(y_test, predicted_labels)
+# TN = conf_matrix[0, 0]
+# FP = conf_matrix[0, 1]
+# FN = conf_matrix[1, 0]
+# TP = conf_matrix[1, 1]
 
-
-weighted_precision = (precision_0 * total_class_0 + precision_1 * total_class_1) / (total_class_0 + total_class_1)
-weighted_recall = (recall_0 * total_class_0 + recall_1 * total_class_1) / (total_class_0 + total_class_1)
-
-if weighted_precision + weighted_recall > 0:
-    weighted_f1_score = 2 * (weighted_precision * weighted_recall) / (weighted_precision + weighted_recall)
-else:
-    weighted_f1_score = 0
-
-weighted_f1_score  = weighted_f1_score*100
-weighted_precision = weighted_precision*100
-weighted_recall    = weighted_recall*100
+# total_class_0 = TN + FP
+# total_class_1 = TP + FN
+# correctly_predicted_0 = TN
+# correctly_predicted_1 = TP
 
 
-model_name = "ShuffleNet"
-technique = "Class Weight"
+# accuracy_0 = (TN / total_class_0) * 100
+# accuracy_1 = (TP / total_class_1) * 100
 
-save_metric_details(model_name, technique, test_acc, weighted_precision, weighted_recall, weighted_f1_score, test_loss, accuracy_0, accuracy_1, result_file_path)
-print(f"Accuracy: {test_acc:.4f} | precision: {weighted_precision:.4f}, Recall={weighted_recall:.4f}, F1-score={weighted_f1_score:.4f}, Loss={test_loss:.4f}, N.G.A Accuracy={accuracy_0:.4f}, G.A Accuracy={accuracy_1:.4f}")
+# precision_0 = TN / (TN + FN) if (TN + FN) > 0 else 0
+# recall_0 = TN / (TN + FP) if (TN + FP) > 0 else 0
+# precision_1 = TP / (TP + FP) if (TP + FP) > 0 else 0
+# recall_1 = TP / (TP + FN) if (TP + FN) > 0 else 0
+
+
+# weighted_precision = (precision_0 * total_class_0 + precision_1 * total_class_1) / (total_class_0 + total_class_1)
+# weighted_recall = (recall_0 * total_class_0 + recall_1 * total_class_1) / (total_class_0 + total_class_1)
+
+# if weighted_precision + weighted_recall > 0:
+#     weighted_f1_score = 2 * (weighted_precision * weighted_recall) / (weighted_precision + weighted_recall)
+# else:
+#     weighted_f1_score = 0
+
+# weighted_f1_score  = weighted_f1_score*100
+# weighted_precision = weighted_precision*100
+# weighted_recall    = weighted_recall*100
+
+
+# model_name = "ShuffleNet"
+# technique = "Class Weight"
+
+# save_metric_details(model_name, technique, test_acc, weighted_precision, weighted_recall, weighted_f1_score, test_loss, accuracy_0, accuracy_1, result_file_path)
+# print(f"Accuracy: {test_acc:.4f} | precision: {weighted_precision:.4f}, Recall={weighted_recall:.4f}, F1-score={weighted_f1_score:.4f}, Loss={test_loss:.4f}, N.G.A Accuracy={accuracy_0:.4f}, G.A Accuracy={accuracy_1:.4f}")
